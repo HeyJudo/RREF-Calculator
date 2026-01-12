@@ -1,5 +1,6 @@
 import { useState, useCallback, useRef, useEffect, KeyboardEvent } from 'react';
 import { solveRREF, SolverResult } from './lib/solver';
+import { playKeyClick, playChargeUp, playSuccess, playError, playNeoWelcome, playNeoCelebrate } from './lib/sounds';
 import './index.css';
 
 // Constants
@@ -25,6 +26,9 @@ function App() {
 
     // Welcome modal state
     const [showWelcome, setShowWelcome] = useState(true);
+
+    // Sound toggle state
+    const [soundEnabled, setSoundEnabled] = useState(true);
 
     // Animation state
     const [animationMode, setAnimationMode] = useState(false);
@@ -77,12 +81,15 @@ function App() {
     const handleCellChange = useCallback((row: number, col: number, value: string) => {
         // Allow numbers, fractions (1/3), negative signs, and decimals
         const sanitized = value.replace(/[^0-9/.\-]/g, '');
+        if (sanitized !== matrix[row][col] && soundEnabled) {
+            playKeyClick(); // Cyberpunk keyboard sound
+        }
         setMatrix(prev => {
             const newMatrix = prev.map(r => [...r]);
             newMatrix[row][col] = sanitized;
             return newMatrix;
         });
-    }, []);
+    }, [matrix, soundEnabled]);
 
     // Keyboard navigation
     const handleKeyDown = useCallback((e: KeyboardEvent<HTMLInputElement>, row: number, col: number) => {
@@ -140,6 +147,7 @@ function App() {
 
     // Solve the matrix
     const handleSolve = useCallback(() => {
+        if (soundEnabled) playChargeUp(); // Cyberpunk charge up sound
         setIsLoading(true);
 
         // Small delay for UX effect
@@ -147,13 +155,23 @@ function App() {
             try {
                 const solverResult = solveRREF(matrix);
                 setResult(solverResult);
+
+                // Play success or celebrate sound based on solution type
+                if (soundEnabled) {
+                    if (solverResult.solutionType === 'unique') {
+                        playNeoCelebrate();
+                    } else {
+                        playSuccess();
+                    }
+                }
             } catch (err) {
                 console.error('Solver error:', err);
+                if (soundEnabled) playError();
             } finally {
                 setIsLoading(false);
             }
         }, 500);
-    }, [matrix]);
+    }, [matrix, soundEnabled]);
 
     // Reset
     const handleReset = useCallback(() => {
@@ -266,6 +284,17 @@ function App() {
         inputRefs.current = Array(rows).fill(null).map(() => Array(cols).fill(null));
     }, [rows, cols]);
 
+    // Play Neo welcome sound when modal appears
+    useEffect(() => {
+        if (showWelcome && soundEnabled) {
+            // Small delay for better experience
+            const timer = setTimeout(() => {
+                playNeoWelcome();
+            }, 300);
+            return () => clearTimeout(timer);
+        }
+    }, [showWelcome, soundEnabled]);
+
     return (
         <div className="app-container">
             {/* Loading Overlay with Neo Thinking */}
@@ -323,6 +352,13 @@ function App() {
                             Gaussian Elimination → <span>Reduced Row Echelon Form</span>
                         </p>
                     </div>
+                    <button
+                        className={`btn-sound-toggle ${soundEnabled ? 'on' : 'off'}`}
+                        onClick={() => setSoundEnabled(!soundEnabled)}
+                        title={soundEnabled ? 'Mute sounds' : 'Unmute sounds'}
+                    >
+                        {soundEnabled ? '🔊' : '🔇'}
+                    </button>
                 </div>
             </header>
 
