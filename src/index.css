@@ -897,11 +897,11 @@ body {
 }
 
 .final-matrix-wrapper {
-    display: flex;
-    justify-content: center;
+    display: block;
     padding: var(--space-lg);
     overflow-x: auto;
     max-width: 100%;
+    text-align: center;
 }
 
 .final-matrix {

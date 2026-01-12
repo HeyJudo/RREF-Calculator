@@ -12,6 +12,10 @@ function App() {
     const [rows, setRows] = useState(3);
     const [cols, setCols] = useState(4); // cols includes augmented column
 
+    // String states for dimension inputs (allows typing)
+    const [rowsInput, setRowsInput] = useState('3');
+    const [colsInput, setColsInput] = useState('4');
+
     // Matrix values as strings for input handling
     const [matrix, setMatrix] = useState<string[][]>(() =>
         createEmptyMatrix(3, 4)
@@ -45,13 +49,14 @@ function App() {
         return Array(r).fill(null).map(() => Array(c).fill(''));
     }
 
-    // Handle dimension change
-    const handleDimensionChange = useCallback((type: 'rows' | 'cols', value: string) => {
+    // Apply dimension change (called on blur or Enter)
+    const applyDimensionChange = useCallback((type: 'rows' | 'cols', value: string) => {
         const num = parseInt(value) || MIN_SIZE;
         const clamped = Math.min(MAX_SIZE, Math.max(MIN_SIZE, num));
 
         if (type === 'rows') {
             setRows(clamped);
+            setRowsInput(clamped.toString());
             setMatrix(prev => {
                 const newMatrix = createEmptyMatrix(clamped, cols);
                 // Preserve existing values
@@ -64,6 +69,7 @@ function App() {
             });
         } else {
             setCols(clamped);
+            setColsInput(clamped.toString());
             setMatrix(prev => {
                 const newMatrix = createEmptyMatrix(rows, clamped);
                 for (let i = 0; i < Math.min(prev.length, rows); i++) {
@@ -220,6 +226,8 @@ function App() {
         const preset = presets[presetKey];
         setRows(preset.rows);
         setCols(preset.cols);
+        setRowsInput(preset.rows.toString());
+        setColsInput(preset.cols.toString());
         setMatrix(preset.matrix);
         setResult(null);
         setAnimationMode(false);
@@ -418,10 +426,10 @@ function App() {
                                     type="text"
                                     inputMode="numeric"
                                     pattern="[0-9]*"
-                                    min={MIN_SIZE}
-                                    max={MAX_SIZE}
-                                    value={rows}
-                                    onChange={(e) => handleDimensionChange('rows', e.target.value)}
+                                    value={rowsInput}
+                                    onChange={(e) => setRowsInput(e.target.value.replace(/[^0-9]/g, ''))}
+                                    onBlur={() => applyDimensionChange('rows', rowsInput)}
+                                    onKeyDown={(e) => e.key === 'Enter' && applyDimensionChange('rows', rowsInput)}
                                 />
                             </div>
                             <div className="dimension-input">
@@ -431,10 +439,10 @@ function App() {
                                     type="text"
                                     inputMode="numeric"
                                     pattern="[0-9]*"
-                                    min={MIN_SIZE}
-                                    max={MAX_SIZE}
-                                    value={cols}
-                                    onChange={(e) => handleDimensionChange('cols', e.target.value)}
+                                    value={colsInput}
+                                    onChange={(e) => setColsInput(e.target.value.replace(/[^0-9]/g, ''))}
+                                    onBlur={() => applyDimensionChange('cols', colsInput)}
+                                    onKeyDown={(e) => e.key === 'Enter' && applyDimensionChange('cols', colsInput)}
                                 />
                             </div>
                             <p className="dimension-info">
