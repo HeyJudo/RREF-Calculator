@@ -655,6 +655,17 @@ body {
     border-radius: 3px;
     text-align: center;
     transition: all 0.2s ease;
+    -webkit-appearance: none;
+    -moz-appearance: textfield;
+    appearance: textfield;
+    touch-action: manipulation;
+}
+
+/* Remove number input spinners */
+.dimension-input input::-webkit-outer-spin-button,
+.dimension-input input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 .dimension-input input:focus {
@@ -889,6 +900,8 @@ body {
     display: flex;
     justify-content: center;
     padding: var(--space-lg);
+    overflow-x: auto;
+    max-width: 100%;
 }
 
 .final-matrix {

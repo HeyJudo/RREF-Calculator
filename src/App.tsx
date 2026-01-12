@@ -415,7 +415,9 @@ function App() {
                                 <label htmlFor="rows">Rows (m)</label>
                                 <input
                                     id="rows"
-                                    type="number"
+                                    type="text"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
                                     min={MIN_SIZE}
                                     max={MAX_SIZE}
                                     value={rows}
@@ -426,7 +428,9 @@ function App() {
                                 <label htmlFor="cols">Columns (n)</label>
                                 <input
                                     id="cols"
-                                    type="number"
+                                    type="text"
+                                    inputMode="numeric"
+                                    pattern="[0-9]*"
                                     min={MIN_SIZE}
                                     max={MAX_SIZE}
                                     value={cols}
