@@ -23,6 +23,9 @@ function App() {
     // Check if matrix dimensions are valid (m ≠ n for augmented matrix)
     const isValidDimensions = rows !== cols;
 
+    // Welcome modal state
+    const [showWelcome, setShowWelcome] = useState(true);
+
     // Animation state
     const [animationMode, setAnimationMode] = useState(false);
     const [currentStep, setCurrentStep] = useState(0);
@@ -161,6 +164,49 @@ function App() {
         setIsPlaying(false);
     }, [rows, cols]);
 
+    // Preset examples
+    const presets = {
+        unique: {
+            name: 'Unique Solution',
+            rows: 3,
+            cols: 4,
+            matrix: [
+                ['2', '1', '-1', '8'],
+                ['-3', '-1', '2', '-11'],
+                ['-2', '1', '2', '-3']
+            ]
+        },
+        infinite: {
+            name: 'Infinite Solutions',
+            rows: 3,
+            cols: 5,
+            matrix: [
+                ['1', '2', '1', '0', '5'],
+                ['2', '4', '0', '1', '8'],
+                ['3', '6', '1', '1', '13']
+            ]
+        },
+        noSolution: {
+            name: 'No Solution',
+            rows: 3,
+            cols: 4,
+            matrix: [
+                ['1', '1', '1', '6'],
+                ['1', '1', '1', '8'],
+                ['0', '0', '1', '3']
+            ]
+        }
+    };
+
+    const loadPreset = useCallback((presetKey: 'unique' | 'infinite' | 'noSolution') => {
+        const preset = presets[presetKey];
+        setRows(preset.rows);
+        setCols(preset.cols);
+        setMatrix(preset.matrix);
+        setResult(null);
+        setAnimationMode(false);
+    }, []);
+
     // Animation controls
     const startAnimation = useCallback(() => {
         setAnimationMode(true);
@@ -222,20 +268,62 @@ function App() {
 
     return (
         <div className="app-container">
-            {/* Loading Overlay */}
+            {/* Loading Overlay with Neo Thinking */}
             {isLoading && (
                 <div className="loading-overlay">
+                    <img
+                        src="/neo/Neo_Thinking.png"
+                        alt="Neo thinking"
+                        className="neo-loading"
+                    />
                     <div className="loading-text">COMPUTING RREF...</div>
                     <div className="loading-bar"></div>
                 </div>
             )}
 
-            {/* Header */}
+            {/* Welcome Modal with Neo Waving */}
+            {showWelcome && (
+                <div className="welcome-overlay" onClick={() => setShowWelcome(false)}>
+                    <div className="welcome-modal" onClick={(e) => e.stopPropagation()}>
+                        <img
+                            src="/neo/Neo_Waving.png"
+                            alt="Neo waving"
+                            className="neo-welcome"
+                        />
+                        <div className="welcome-content">
+                            <h2>Welcome to the Matrix!</h2>
+                            <p>I'm Neo, your guide to <strong>Reduced Row Echelon Form</strong>.</p>
+                            <ul>
+                                <li>📊 Enter your augmented matrix</li>
+                                <li>⚡ Click "Execute RREF" to solve</li>
+                                <li>🎬 Watch the step-by-step animation</li>
+                            </ul>
+                            <button
+                                className="btn btn-primary"
+                                onClick={() => setShowWelcome(false)}
+                            >
+                                Let's Begin →
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Header with Neo Standing */}
             <header className="header">
-                <h1 className="header__title">RREF Calculator</h1>
-                <p className="header__subtitle">
-                    Gaussian Elimination → <span>Reduced Row Echelon Form</span>
-                </p>
+                <div className="header__content">
+                    <img
+                        src="/neo/Neo_Standing.png"
+                        alt="Neo"
+                        className="neo-header"
+                    />
+                    <div>
+                        <h1 className="header__title">RREF Calculator</h1>
+                        <p className="header__subtitle">
+                            Gaussian Elimination → <span>Reduced Row Echelon Form</span>
+                        </p>
+                    </div>
+                </div>
             </header>
 
             <main className="main-content">
@@ -273,6 +361,32 @@ function App() {
                                 {rows} equations, {cols - 1} variables (augmented matrix: {rows}×{cols})
                             </p>
                         </div>
+
+                        {/* Preset Examples */}
+                        <div className="presets-section">
+                            <label className="presets-label">Try Example:</label>
+                            <div className="presets-buttons">
+                                <button
+                                    className="btn-preset unique"
+                                    onClick={() => loadPreset('unique')}
+                                >
+                                    ✓ Unique
+                                </button>
+                                <button
+                                    className="btn-preset infinite"
+                                    onClick={() => loadPreset('infinite')}
+                                >
+                                    ∞ Infinite
+                                </button>
+                                <button
+                                    className="btn-preset no-solution"
+                                    onClick={() => loadPreset('noSolution')}
+                                >
+                                    ✗ No Solution
+                                </button>
+                            </div>
+                        </div>
+
                         {/* Validation Warning */}
                         {!isValidDimensions && (
                             <div className="validation-error">
@@ -350,10 +464,19 @@ function App() {
                                 <h2 className="panel__title">Solution</h2>
                             </div>
                             <div className="panel__content">
-                                <div className={`solution-badge ${result.solutionType}`}>
-                                    {result.solutionType === 'unique' && '✓ UNIQUE SOLUTION'}
-                                    {result.solutionType === 'infinite' && '∞ INFINITE SOLUTIONS'}
-                                    {result.solutionType === 'inconsistent' && '✗ NO SOLUTION (INCONSISTENT)'}
+                                <div className="solution-header">
+                                    {result.solutionType === 'unique' && (
+                                        <img
+                                            src="/neo/Neo_Celebrating.png"
+                                            alt="Neo celebrating"
+                                            className="neo-celebrating"
+                                        />
+                                    )}
+                                    <div className={`solution-badge ${result.solutionType}`}>
+                                        {result.solutionType === 'unique' && '✓ UNIQUE SOLUTION'}
+                                        {result.solutionType === 'infinite' && '∞ INFINITE SOLUTIONS'}
+                                        {result.solutionType === 'inconsistent' && '✗ NO SOLUTION (INCONSISTENT)'}
+                                    </div>
                                 </div>
 
                                 {result.solution && result.solutionType !== 'inconsistent' && (

@@ -114,7 +114,7 @@ body {
 
 .header {
     text-align: center;
-    padding: var(--space-2xl) var(--space-lg);
+    padding: var(--space-xl) var(--space-lg);
     border-bottom: 1px solid var(--border-dim);
     position: relative;
     overflow: hidden;
@@ -130,6 +130,13 @@ body {
     height: 1px;
     background: linear-gradient(90deg, transparent, var(--matrix-glow), transparent);
     box-shadow: var(--glow-md);
+}
+
+.header__content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-lg);
 }
 
 .header__title {
@@ -148,13 +155,212 @@ body {
 }
 
 .header__subtitle {
-    font-size: 0.85rem;
+    font-size: 0.9rem;
     color: var(--text-dim);
     letter-spacing: 0.1em;
 }
 
 .header__subtitle span {
     color: var(--matrix-dim);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   NEO MASCOT IMAGES
+   ═══════════════════════════════════════════════════════════ */
+
+/* All Neo images - styled properly for dark theme */
+.neo-header,
+.neo-welcome,
+.neo-loading,
+.neo-celebrating {
+    border-radius: 8px;
+    background: transparent;
+}
+
+.neo-header {
+    width: 80px;
+    height: auto;
+    animation: neoFloat 3s ease-in-out infinite;
+}
+
+.neo-welcome {
+    width: 200px;
+    height: auto;
+    animation: neoWave 1s ease-in-out infinite;
+}
+
+.neo-loading {
+    width: 140px;
+    height: auto;
+    animation: neoThink 2s ease-in-out infinite;
+    margin-bottom: var(--space-lg);
+}
+
+.neo-celebrating {
+    width: 110px;
+    height: auto;
+    animation: neoCelebrate 0.5s ease-in-out infinite;
+}
+
+@keyframes neoFloat {
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-8px);
+    }
+}
+
+@keyframes neoWave {
+
+    0%,
+    100% {
+        transform: rotate(-2deg);
+    }
+
+    50% {
+        transform: rotate(2deg);
+    }
+}
+
+@keyframes neoThink {
+
+    0%,
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.02);
+        opacity: 0.9;
+    }
+}
+
+@keyframes neoCelebrate {
+
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+
+    25% {
+        transform: translateY(-5px) rotate(2deg);
+    }
+
+    75% {
+        transform: translateY(-5px) rotate(-2deg);
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   WELCOME MODAL
+   ═══════════════════════════════════════════════════════════ */
+
+.welcome-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.welcome-modal {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xl);
+    padding: var(--space-2xl);
+    background: var(--bg-panel);
+    border: 1px solid var(--matrix-dark);
+    border-radius: 8px;
+    box-shadow:
+        0 0 40px var(--matrix-shadow),
+        inset 0 0 30px rgba(0, 255, 65, 0.02);
+    max-width: 650px;
+    animation: modalSlideIn 0.4s ease;
+}
+
+@keyframes modalSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.95);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+.welcome-content {
+    flex: 1;
+}
+
+.welcome-content h2 {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: var(--matrix-glow);
+    text-shadow: var(--glow-md);
+    margin-bottom: var(--space-md);
+}
+
+.welcome-content p {
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    margin-bottom: var(--space-lg);
+    line-height: 1.6;
+}
+
+.welcome-content strong {
+    color: var(--matrix-dim);
+}
+
+.welcome-content ul {
+    list-style: none;
+    margin-bottom: var(--space-xl);
+}
+
+.welcome-content li {
+    font-size: 1rem;
+    color: var(--text-dim);
+    padding: var(--space-sm) 0;
+    border-bottom: 1px solid var(--border-dim);
+}
+
+.welcome-content li:last-child {
+    border-bottom: none;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SOLUTION HEADER (with Neo)
+   ═══════════════════════════════════════════════════════════ */
+
+.solution-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-bottom: var(--space-lg);
 }
 
 @keyframes textFlicker {
@@ -322,6 +528,77 @@ body {
     font-size: 0.95rem;
     color: var(--text-dim);
     margin-left: auto;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PRESET EXAMPLES
+   ═══════════════════════════════════════════════════════════ */
+
+.presets-section {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    margin-top: var(--space-lg);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--border-dim);
+    flex-wrap: wrap;
+}
+
+.presets-label {
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    font-weight: 500;
+}
+
+.presets-buttons {
+    display: flex;
+    gap: var(--space-sm);
+    flex-wrap: wrap;
+}
+
+.btn-preset {
+    padding: var(--space-sm) var(--space-md);
+    font-family: var(--font-display);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    border: 1px solid;
+    border-radius: 3px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: transparent;
+}
+
+.btn-preset.unique {
+    color: var(--success-green);
+    border-color: var(--success-green);
+}
+
+.btn-preset.unique:hover {
+    background: rgba(0, 230, 118, 0.15);
+    box-shadow: 0 0 10px rgba(0, 230, 118, 0.3);
+}
+
+.btn-preset.infinite {
+    color: var(--warning-amber);
+    border-color: var(--warning-amber);
+}
+
+.btn-preset.infinite:hover {
+    background: rgba(255, 171, 0, 0.15);
+    box-shadow: 0 0 10px rgba(255, 171, 0, 0.3);
+}
+
+.btn-preset.no-solution {
+    color: var(--error-crimson);
+    border-color: var(--error-crimson);
+}
+
+.btn-preset.no-solution:hover {
+    background: rgba(255, 23, 68, 0.15);
+    box-shadow: 0 0 10px rgba(255, 23, 68, 0.3);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -1060,4 +1337,80 @@ body {
 
 .mt-lg {
     margin-top: var(--space-lg);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   MOBILE RESPONSIVE - WELCOME MODAL
+   ═══════════════════════════════════════════════════════════ */
+
+@media (max-width: 700px) {
+    .welcome-modal {
+        flex-direction: column;
+        text-align: center;
+        padding: var(--space-lg);
+        margin: var(--space-md);
+        gap: var(--space-lg);
+        max-width: 95%;
+    }
+
+    .neo-welcome {
+        width: 120px;
+        order: -1;
+    }
+
+    .welcome-content h2 {
+        font-size: 1.4rem;
+    }
+
+    .welcome-content p {
+        font-size: 1rem;
+    }
+
+    .welcome-content li {
+        font-size: 0.9rem;
+        text-align: left;
+    }
+
+    .welcome-content ul {
+        margin-bottom: var(--space-lg);
+    }
+
+    /* Header mobile */
+    .header__content {
+        flex-direction: column;
+        gap: var(--space-md);
+    }
+
+    .neo-header {
+        width: 60px;
+    }
+
+    .header__title {
+        font-size: 1.3rem;
+    }
+
+    /* Presets mobile */
+    .presets-section {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .presets-buttons {
+        width: 100%;
+    }
+
+    .btn-preset {
+        flex: 1;
+        text-align: center;
+    }
+
+    /* Solution header mobile */
+    .solution-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .neo-celebrating {
+        width: 80px;
+    }
 }
