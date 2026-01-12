@@ -290,7 +290,7 @@ function App() {
                         <h2 className="panel__title">Input Matrix</h2>
                     </div>
                     <div className="panel__content">
-                        <p className="text-dim" style={{ marginBottom: '1rem', fontSize: '0.8rem' }}>
+                        <p className="helper-text">
                             Enter coefficients. Use fractions (e.g., 1/3) or decimals. Last column = constants.
                         </p>
                         <div className="matrix-wrapper">
@@ -377,10 +377,10 @@ function App() {
                                     </p>
                                 )}
 
-                                <p className="text-dim mt-lg" style={{ fontSize: '0.75rem' }}>
-                                    Rank: {result.rank} |
+                                <p className="rank-info">
+                                    Rank: {result.rank}
                                     {result.freeVariables.length > 0 &&
-                                        ` Free variables: ${result.freeVariables.map(v => `x${v + 1}`).join(', ')}`
+                                        ` | Free variables: ${result.freeVariables.map(v => `x${v + 1}`).join(', ')}`
                                     }
                                 </p>
                             </div>
@@ -449,10 +449,18 @@ function App() {
                                             </button>
                                             <button
                                                 className="btn-control btn-play"
-                                                onClick={togglePlay}
-                                                title={isPlaying ? 'Pause' : 'Play'}
+                                                onClick={() => {
+                                                    if (currentStep >= result.steps.length - 1) {
+                                                        // Restart from beginning
+                                                        setCurrentStep(0);
+                                                        setIsPlaying(true);
+                                                    } else {
+                                                        togglePlay();
+                                                    }
+                                                }}
+                                                title={currentStep >= result.steps.length - 1 ? 'Replay' : (isPlaying ? 'Pause' : 'Play')}
                                             >
-                                                {isPlaying ? '⏸' : '▶'}
+                                                {currentStep >= result.steps.length - 1 ? '↺' : (isPlaying ? '⏸' : '▶')}
                                             </button>
                                             <button
                                                 className="btn-control"
