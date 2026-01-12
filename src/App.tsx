@@ -509,6 +509,35 @@ function App() {
                             </div>
                         </section>
 
+                        {/* Final RREF Matrix - Prominent Display */}
+                        <section className="panel final-matrix-panel">
+                            <div className="panel__header">
+                                <span className="panel__indicator"></span>
+                                <h2 className="panel__title">Final RREF Matrix</h2>
+                            </div>
+                            <div className="panel__content">
+                                <div className="final-matrix-wrapper">
+                                    <div className="final-matrix">
+                                        {result.steps[result.steps.length - 1].matrix.map((row, rIdx) => (
+                                            <div key={rIdx} className="final-matrix-row">
+                                                {row.map((cell, cIdx) => (
+                                                    <span
+                                                        key={cIdx}
+                                                        className={`final-matrix-cell ${cIdx === row.length - 1 ? 'augmented' : ''}`}
+                                                    >
+                                                        {cell}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <p className="final-matrix-caption">
+                                    This is the Reduced Row Echelon Form of your input matrix.
+                                </p>
+                            </div>
+                        </section>
+
                         {/* Steps Panel */}
                         <section className="panel">
                             <div className="panel__header">

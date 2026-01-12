@@ -151,7 +151,112 @@ body {
         0 0 20px var(--matrix-shadow),
         0 0 40px var(--matrix-shadow);
     margin-bottom: var(--space-sm);
-    animation: textFlicker 4s infinite;
+    position: relative;
+    animation: glitchText 3s infinite;
+}
+
+/* Glitch effect pseudo-elements */
+.header__title::before,
+.header__title::after {
+    content: 'RREF CALCULATOR';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: transparent;
+}
+
+.header__title::before {
+    color: var(--cyber-cyan);
+    animation: glitchBefore 3s infinite;
+    clip-path: polygon(0 0, 100% 0, 100% 45%, 0 45%);
+}
+
+.header__title::after {
+    color: #ff0066;
+    animation: glitchAfter 3s infinite;
+    clip-path: polygon(0 55%, 100% 55%, 100% 100%, 0 100%);
+}
+
+@keyframes glitchText {
+
+    0%,
+    90%,
+    100% {
+        text-shadow:
+            0 0 10px var(--matrix-shadow),
+            0 0 20px var(--matrix-shadow);
+    }
+
+    92% {
+        text-shadow:
+            -2px 0 var(--cyber-cyan),
+            2px 0 #ff0066,
+            0 0 20px var(--matrix-shadow);
+        transform: translateX(2px);
+    }
+
+    94% {
+        text-shadow:
+            2px 0 var(--cyber-cyan),
+            -2px 0 #ff0066;
+        transform: translateX(-2px);
+    }
+
+    96% {
+        transform: translateX(0);
+    }
+}
+
+@keyframes glitchBefore {
+
+    0%,
+    90%,
+    100% {
+        transform: translateX(0);
+        opacity: 0;
+    }
+
+    91% {
+        transform: translateX(-4px);
+        opacity: 0.8;
+    }
+
+    93% {
+        transform: translateX(4px);
+        opacity: 0.8;
+    }
+
+    95% {
+        transform: translateX(-2px);
+        opacity: 0;
+    }
+}
+
+@keyframes glitchAfter {
+
+    0%,
+    90%,
+    100% {
+        transform: translateX(0);
+        opacity: 0;
+    }
+
+    92% {
+        transform: translateX(4px);
+        opacity: 0.8;
+    }
+
+    94% {
+        transform: translateX(-4px);
+        opacity: 0.8;
+    }
+
+    96% {
+        transform: translateX(2px);
+        opacity: 0;
+    }
 }
 
 .header__subtitle {
@@ -690,6 +795,71 @@ body {
     width: 2px;
     background: var(--cyber-cyan);
     box-shadow: 0 0 8px var(--cyber-cyan);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FINAL RREF MATRIX PANEL
+   ═══════════════════════════════════════════════════════════ */
+
+.final-matrix-panel {
+    border-color: var(--matrix-glow);
+    box-shadow: 0 0 20px var(--matrix-shadow);
+}
+
+.final-matrix-panel .panel__indicator {
+    background: var(--matrix-glow);
+    box-shadow: var(--glow-md);
+}
+
+.final-matrix-wrapper {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-lg);
+}
+
+.final-matrix {
+    display: inline-flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: var(--space-lg);
+    background: var(--bg-void);
+    border: 2px solid var(--matrix-glow);
+    border-radius: 6px;
+    box-shadow:
+        inset 0 0 20px rgba(0, 255, 65, 0.05),
+        0 0 30px var(--matrix-shadow);
+}
+
+.final-matrix-row {
+    display: flex;
+    gap: var(--space-md);
+}
+
+.final-matrix-cell {
+    min-width: 70px;
+    padding: var(--space-sm) var(--space-md);
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: var(--matrix-glow);
+    background: rgba(0, 255, 65, 0.05);
+    border-radius: 3px;
+}
+
+.final-matrix-cell.augmented {
+    border-left: 2px solid var(--cyber-cyan);
+    padding-left: var(--space-lg);
+    margin-left: var(--space-sm);
+    color: var(--cyber-cyan);
+}
+
+.final-matrix-caption {
+    text-align: center;
+    margin-top: var(--space-lg);
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    font-style: italic;
 }
 
 /* ═══════════════════════════════════════════════════════════
