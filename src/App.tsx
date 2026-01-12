@@ -225,6 +225,46 @@ function App() {
         setAnimationMode(false);
     }, []);
 
+    // Random matrix generator
+    const generateRandomMatrix = useCallback(() => {
+        const newMatrix: string[][] = [];
+        for (let i = 0; i < rows; i++) {
+            const row: string[] = [];
+            for (let j = 0; j < cols; j++) {
+                // Random integer from -9 to 9
+                const randomValue = Math.floor(Math.random() * 19) - 9;
+                row.push(randomValue.toString());
+            }
+            newMatrix.push(row);
+        }
+        setMatrix(newMatrix);
+        setResult(null);
+        setAnimationMode(false);
+        if (soundEnabled) playKeyClick();
+    }, [rows, cols, soundEnabled]);
+
+    // Copy matrix as text
+    const [copySuccess, setCopySuccess] = useState(false);
+
+    const copyMatrixAsText = useCallback(() => {
+        if (!result) return;
+
+        const finalMatrix = result.steps[result.steps.length - 1].matrix;
+        const textLines = finalMatrix.map(row =>
+            '[ ' + row.join('  ') + ' ]'
+        );
+        const matrixText = textLines.join('\n');
+
+        navigator.clipboard.writeText(matrixText).then(() => {
+            setCopySuccess(true);
+            if (soundEnabled) playSuccess();
+            setTimeout(() => setCopySuccess(false), 2000);
+        }).catch(err => {
+            console.error('Copy failed:', err);
+            if (soundEnabled) playError();
+        });
+    }, [result, soundEnabled]);
+
     // Animation controls
     const startAnimation = useCallback(() => {
         setAnimationMode(true);
@@ -420,6 +460,12 @@ function App() {
                                 >
                                     ✗ No Solution
                                 </button>
+                                <button
+                                    className="btn-preset random"
+                                    onClick={generateRandomMatrix}
+                                >
+                                    🎲 Random
+                                </button>
                             </div>
                         </div>
 
@@ -550,6 +596,13 @@ function App() {
                             <div className="panel__header">
                                 <span className="panel__indicator"></span>
                                 <h2 className="panel__title">Final RREF Matrix</h2>
+                                <button
+                                    className={`btn btn-copy ${copySuccess ? 'success' : ''}`}
+                                    onClick={copyMatrixAsText}
+                                    title="Copy matrix as plain text"
+                                >
+                                    {copySuccess ? '✓ Copied!' : '📋 Copy'}
+                                </button>
                             </div>
                             <div className="panel__content">
                                 <div className="final-matrix-wrapper">
