@@ -20,6 +20,16 @@ function App() {
     const [result, setResult] = useState<SolverResult | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
+    // Check if matrix dimensions are valid (m ≠ n for augmented matrix)
+    const isValidDimensions = rows !== cols;
+
+    // Animation state
+    const [animationMode, setAnimationMode] = useState(false);
+    const [currentStep, setCurrentStep] = useState(0);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [playSpeed, setPlaySpeed] = useState(1500); // ms between steps
+    const animationTimerRef = useRef<number | null>(null);
+
     // Refs for input navigation
     const inputRefs = useRef<(HTMLInputElement | null)[][]>([]);
 
@@ -146,7 +156,64 @@ function App() {
     const handleReset = useCallback(() => {
         setMatrix(createEmptyMatrix(rows, cols));
         setResult(null);
+        setAnimationMode(false);
+        setCurrentStep(0);
+        setIsPlaying(false);
     }, [rows, cols]);
+
+    // Animation controls
+    const startAnimation = useCallback(() => {
+        setAnimationMode(true);
+        setCurrentStep(0);
+        setIsPlaying(true);
+    }, []);
+
+    const stopAnimation = useCallback(() => {
+        setIsPlaying(false);
+        if (animationTimerRef.current) {
+            clearTimeout(animationTimerRef.current);
+            animationTimerRef.current = null;
+        }
+    }, []);
+
+    const togglePlay = useCallback(() => {
+        setIsPlaying(prev => !prev);
+    }, []);
+
+    const nextStep = useCallback(() => {
+        if (result && currentStep < result.steps.length - 1) {
+            setCurrentStep(prev => prev + 1);
+        }
+    }, [result, currentStep]);
+
+    const prevStep = useCallback(() => {
+        if (currentStep > 0) {
+            setCurrentStep(prev => prev - 1);
+        }
+    }, [currentStep]);
+
+    const exitAnimation = useCallback(() => {
+        stopAnimation();
+        setAnimationMode(false);
+    }, [stopAnimation]);
+
+    // Auto-advance when playing
+    useEffect(() => {
+        if (isPlaying && result && currentStep < result.steps.length - 1) {
+            animationTimerRef.current = window.setTimeout(() => {
+                setCurrentStep(prev => prev + 1);
+            }, playSpeed);
+        } else if (isPlaying && result && currentStep >= result.steps.length - 1) {
+            // Reached the end
+            setIsPlaying(false);
+        }
+
+        return () => {
+            if (animationTimerRef.current) {
+                clearTimeout(animationTimerRef.current);
+            }
+        };
+    }, [isPlaying, currentStep, result, playSpeed]);
 
     // Initialize refs when dimensions change
     useEffect(() => {
@@ -206,6 +273,13 @@ function App() {
                                 {rows} equations, {cols - 1} variables (augmented matrix: {rows}×{cols})
                             </p>
                         </div>
+                        {/* Validation Warning */}
+                        {!isValidDimensions && (
+                            <div className="validation-error">
+                                ⚠ Error: Rows (m) must NOT equal Columns (n) for an augmented matrix.
+                                Currently m = n = {rows}. Please adjust dimensions.
+                            </div>
+                        )}
                     </div>
                 </section>
 
@@ -251,7 +325,12 @@ function App() {
                         </div>
 
                         <div className="btn-group">
-                            <button className="btn btn-primary" onClick={handleSolve}>
+                            <button
+                                className="btn btn-primary"
+                                onClick={handleSolve}
+                                disabled={!isValidDimensions}
+                                title={!isValidDimensions ? 'Fix dimension error first' : 'Compute RREF'}
+                            >
                                 ▶ Execute RREF
                             </button>
                             <button className="btn btn-secondary" onClick={handleReset}>
@@ -312,37 +391,133 @@ function App() {
                             <div className="panel__header">
                                 <span className="panel__indicator"></span>
                                 <h2 className="panel__title">Step-by-Step Operations</h2>
+                                {!animationMode && (
+                                    <button
+                                        className="btn btn-animation"
+                                        onClick={startAnimation}
+                                    >
+                                        ▶ Watch Animation
+                                    </button>
+                                )}
                             </div>
                             <div className="panel__content">
-                                <div className="steps-container">
-                                    {result.steps.map((step, idx) => (
-                                        <div
-                                            key={idx}
-                                            className="step"
-                                            style={{ animationDelay: `${idx * 0.05}s` }}
-                                        >
-                                            <div className="step__number">{idx + 1}</div>
-                                            <div className="step__content">
-                                                <div className="step__operation">{step.operation}</div>
-                                                <div className="step__matrix">
-                                                    {step.matrix.map((row, rIdx) => (
-                                                        <div key={rIdx} className="step__matrix-row">
-                                                            {row.map((cell, cIdx) => (
-                                                                <span
-                                                                    key={cIdx}
-                                                                    className={`step__matrix-cell ${step.highlightRows?.includes(rIdx) ? 'highlighted' : ''
-                                                                        } ${cIdx === row.length - 1 ? 'augmented' : ''}`}
-                                                                >
-                                                                    {cell}
-                                                                </span>
-                                                            ))}
-                                                        </div>
-                                                    ))}
-                                                </div>
+                                {animationMode ? (
+                                    /* Animated Player Mode */
+                                    <div className="animation-player">
+                                        {/* Progress Bar */}
+                                        <div className="animation-progress">
+                                            <div
+                                                className="animation-progress__bar"
+                                                style={{ width: `${((currentStep + 1) / result.steps.length) * 100}%` }}
+                                            />
+                                        </div>
+                                        <div className="animation-step-info">
+                                            Step {currentStep + 1} of {result.steps.length}
+                                        </div>
+
+                                        {/* Current Step Display */}
+                                        <div className="animation-current-step">
+                                            <div className="step__operation animation-operation">
+                                                {result.steps[currentStep].operation}
+                                            </div>
+                                            <div className="animation-matrix">
+                                                {result.steps[currentStep].matrix.map((row, rIdx) => (
+                                                    <div key={rIdx} className="step__matrix-row">
+                                                        {row.map((cell, cIdx) => (
+                                                            <span
+                                                                key={cIdx}
+                                                                className={`step__matrix-cell animation-cell ${result.steps[currentStep].highlightRows?.includes(rIdx) ? 'highlighted' : ''
+                                                                    } ${cIdx === row.length - 1 ? 'augmented' : ''}`}
+                                                            >
+                                                                {cell}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                ))}
                                             </div>
                                         </div>
-                                    ))}
-                                </div>
+
+                                        {/* Controls */}
+                                        <div className="animation-controls">
+                                            <button
+                                                className="btn-control"
+                                                onClick={prevStep}
+                                                disabled={currentStep === 0}
+                                                title="Previous Step"
+                                            >
+                                                ⏮
+                                            </button>
+                                            <button
+                                                className="btn-control btn-play"
+                                                onClick={togglePlay}
+                                                title={isPlaying ? 'Pause' : 'Play'}
+                                            >
+                                                {isPlaying ? '⏸' : '▶'}
+                                            </button>
+                                            <button
+                                                className="btn-control"
+                                                onClick={nextStep}
+                                                disabled={currentStep >= result.steps.length - 1}
+                                                title="Next Step"
+                                            >
+                                                ⏭
+                                            </button>
+                                        </div>
+
+                                        {/* Speed Control */}
+                                        <div className="animation-speed">
+                                            <label>Speed:</label>
+                                            <input
+                                                type="range"
+                                                min="500"
+                                                max="3000"
+                                                step="250"
+                                                value={3500 - playSpeed}
+                                                onChange={(e) => setPlaySpeed(3500 - parseInt(e.target.value))}
+                                            />
+                                            <span>{playSpeed < 1000 ? 'Fast' : playSpeed < 2000 ? 'Normal' : 'Slow'}</span>
+                                        </div>
+
+                                        <button
+                                            className="btn btn-secondary mt-lg"
+                                            onClick={exitAnimation}
+                                            style={{ width: '100%' }}
+                                        >
+                                            Exit Animation → View All Steps
+                                        </button>
+                                    </div>
+                                ) : (
+                                    /* Static Steps List */
+                                    <div className="steps-container">
+                                        {result.steps.map((step, idx) => (
+                                            <div
+                                                key={idx}
+                                                className="step"
+                                                style={{ animationDelay: `${idx * 0.05}s` }}
+                                            >
+                                                <div className="step__number">{idx + 1}</div>
+                                                <div className="step__content">
+                                                    <div className="step__operation">{step.operation}</div>
+                                                    <div className="step__matrix">
+                                                        {step.matrix.map((row, rIdx) => (
+                                                            <div key={rIdx} className="step__matrix-row">
+                                                                {row.map((cell, cIdx) => (
+                                                                    <span
+                                                                        key={cIdx}
+                                                                        className={`step__matrix-cell ${step.highlightRows?.includes(rIdx) ? 'highlighted' : ''
+                                                                            } ${cIdx === row.length - 1 ? 'augmented' : ''}`}
+                                                                    >
+                                                                        {cell}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </section>
                     </>

@@ -82,6 +82,14 @@ function isOne(frac: Fraction): boolean {
 }
 
 /**
+ * Convert a number to subscript Unicode characters for notation like E₁₂
+ */
+function subscript(num: number): string {
+    const subscripts = ['₀', '₁', '₂', '₃', '₄', '₅', '₆', '₇', '₈', '₉'];
+    return String(num).split('').map(d => subscripts[parseInt(d)] || d).join('');
+}
+
+/**
  * Convert fraction matrix to string matrix for display
  */
 function matrixToStrings(matrix: Fraction[][]): string[][] {
@@ -137,17 +145,17 @@ export function solveRREF(inputMatrix: string[][]): SolverResult {
 
         pivotColumns.push(col);
 
-        // Swap rows if necessary
+        // Swap rows if necessary (Type I operation: E_ij)
         if (maxRow !== pivotRow) {
             [matrix[pivotRow], matrix[maxRow]] = [matrix[maxRow], matrix[pivotRow]];
             steps.push({
-                operation: `R${pivotRow + 1} ↔ R${maxRow + 1}`,
+                operation: `[Type I] E${subscript(pivotRow + 1)}${subscript(maxRow + 1)} : Swap R${pivotRow + 1} ↔ R${maxRow + 1}`,
                 matrix: matrixToStrings(matrix),
                 highlightRows: [pivotRow, maxRow]
             });
         }
 
-        // Scale pivot to 1
+        // Scale pivot to 1 (Type II operation: E_i(α))
         const pivotVal = matrix[pivotRow][col];
         if (!isOne(pivotVal)) {
             const scalar = math.divide(1, pivotVal) as Fraction;
@@ -155,22 +163,23 @@ export function solveRREF(inputMatrix: string[][]): SolverResult {
                 matrix[pivotRow][j] = math.multiply(matrix[pivotRow][j], scalar) as Fraction;
             }
             steps.push({
-                operation: `R${pivotRow + 1} = R${pivotRow + 1} × (${fractionToString(scalar)})`,
+                operation: `[Type II] E${subscript(pivotRow + 1)}(${fractionToString(scalar)}) : Multiply R${pivotRow + 1} by ${fractionToString(scalar)}`,
                 matrix: matrixToStrings(matrix),
                 highlightRows: [pivotRow]
             });
         }
 
-        // Eliminate in all other rows (both above and below for RREF)
+        // Eliminate in all other rows (Type III operation: E_ij(α))
         for (let i = 0; i < rows; i++) {
             if (i !== pivotRow && !isZero(matrix[i][col])) {
                 const factor = matrix[i][col];
+                const negFactor = math.multiply(factor, -1) as Fraction;
                 for (let j = 0; j < cols; j++) {
                     const product = math.multiply(factor, matrix[pivotRow][j]) as Fraction;
                     matrix[i][j] = math.subtract(matrix[i][j], product) as Fraction;
                 }
                 steps.push({
-                    operation: `R${i + 1} = R${i + 1} − (${fractionToString(factor)}) × R${pivotRow + 1}`,
+                    operation: `[Type III] E${subscript(i + 1)}${subscript(pivotRow + 1)}(${fractionToString(negFactor)}) : R${i + 1} + (${fractionToString(negFactor)}) × R${pivotRow + 1}`,
                     matrix: matrixToStrings(matrix),
                     highlightRows: [i, pivotRow]
                 });
@@ -225,7 +234,7 @@ export function solveRREF(inputMatrix: string[][]): SolverResult {
         solutionType = 'infinite';
 
         steps.push({
-            operation: `∞ Infinite solutions (Free variables: ${freeVariables.map(v => `x${v + 1}`).join(', ')})`,
+            operation: `∞ Infinite solutions (Free variables: ${freeVariables.map(v => `x${subscript(v + 1)}`).join(', ')})`,
             matrix: matrixToStrings(matrix)
         });
 
@@ -233,7 +242,7 @@ export function solveRREF(inputMatrix: string[][]): SolverResult {
         solution = [];
         for (let j = 0; j < numVariables; j++) {
             if (freeVariables.includes(j)) {
-                solution.push(`x${j + 1} = t${freeVariables.indexOf(j) + 1} (free)`);
+                solution.push(`x${subscript(j + 1)} = t${subscript(freeVariables.indexOf(j) + 1)} (free)`);
             } else {
                 // Find the row where this is a pivot
                 const pivotRowIdx = pivotColumns.indexOf(j);
@@ -244,14 +253,27 @@ export function solveRREF(inputMatrix: string[][]): SolverResult {
                         const coef = matrix[pivotRowIdx][fv];
                         if (!isZero(coef)) {
                             const negCoef = math.multiply(coef, -1) as Fraction;
+                            const tVar = `t${subscript(freeVariables.indexOf(fv) + 1)}`;
+                            const coefStr = fractionToString(math.abs(negCoef) as Fraction);
+
                             if (Number(negCoef.s) >= 0) {
-                                expr += ` + ${fractionToString(negCoef)}t${freeVariables.indexOf(fv) + 1}`;
+                                // Positive coefficient
+                                if (coefStr === '1') {
+                                    expr += ` + ${tVar}`;
+                                } else {
+                                    expr += ` + ${coefStr}${tVar}`;
+                                }
                             } else {
-                                expr += ` - ${fractionToString(math.abs(negCoef) as Fraction)}t${freeVariables.indexOf(fv) + 1}`;
+                                // Negative coefficient
+                                if (coefStr === '1') {
+                                    expr += ` - ${tVar}`;
+                                } else {
+                                    expr += ` - ${coefStr}${tVar}`;
+                                }
                             }
                         }
                     }
-                    solution.push(`x${j + 1} = ${expr}`);
+                    solution.push(`x${subscript(j + 1)} = ${expr}`);
                 }
             }
         }
@@ -259,7 +281,7 @@ export function solveRREF(inputMatrix: string[][]): SolverResult {
         solutionType = 'unique';
         solution = [];
         for (let i = 0; i < numVariables && i < rows; i++) {
-            solution.push(`x${i + 1} = ${fractionToString(matrix[i][cols - 1])}`);
+            solution.push(`x${subscript(i + 1)} = ${fractionToString(matrix[i][cols - 1])}`);
         }
 
         steps.push({
