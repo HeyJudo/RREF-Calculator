@@ -785,6 +785,8 @@ body {
 .matrix-wrapper {
     overflow-x: auto;
     padding: var(--space-sm);
+    display: flex;
+    justify-content: center;
 }
 
 .matrix-grid {
